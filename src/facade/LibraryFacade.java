@@ -57,4 +57,29 @@ public class LibraryFacade {
 
         return "Book borrowed successfully. Due date: " + loan.getDueDate();
     }
+
+    public String returnBook(int bookId) {
+        return returnBook(bookId, java.time.LocalDate.now());
+    }
+
+    public String returnBook(int bookId, java.time.LocalDate returnDate) {
+        Loan loan = loanManager.findActiveLoan(bookId);
+        if (loan == null) {
+            return "Error: no active loan found for this book";
+        }
+
+        Book book = bookCatalog.findBook(bookId);
+        Member member = memberRegistry.findMember(loan.getMemberId());
+
+        if (book == null || member == null) {
+            return "Error: book or member not found";
+        }
+
+        double fine = fineCalculator.calculateFine(loan, returnDate);
+        loanManager.returnLoan(loan);
+        bookCatalog.updateAvailability(bookId, true);
+        notificationService.notifyReturned(member, book, fine);
+
+        return "Book returned successfully";
+    }
 }
