@@ -6,7 +6,7 @@ import model.Member;
 public class NotificationService {
     public void notifyBorrowed(Member member, Book book) {
         System.out.println("Notification: " + member.getName()
-                + " borrowed \"" + book.getTitle());
+                + " borrowed \"" + book.getTitle() + "\"");
     }
 
     public void notifyReturned(Member member, Book book, double fine) {
