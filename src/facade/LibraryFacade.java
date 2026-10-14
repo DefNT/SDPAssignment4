@@ -1,6 +1,8 @@
 package facade;
 
 import model.Book;
+import model.Loan;
+import model.Member;
 import subsystem.*;
 
 import java.util.ArrayList;
@@ -27,5 +29,32 @@ public class LibraryFacade {
             titles.add(book.toString());
         }
         return titles;
+    }
+
+    public String borrowBook(int bookId, int memberId) {
+        return borrowBook(bookId, memberId, java.time.LocalDate.now());
+    }
+
+    public String borrowBook(int bookId, int memberId, java.time.LocalDate borrowDate) {
+        Member member = memberRegistry.findMember(memberId);
+        if (member == null) {
+            return "Error: member not found";
+        }
+        if (!member.isActive()) {
+            return "Error: membership is inactive";
+        }
+        Book book = bookCatalog.findBook(bookId);
+        if (book == null) {
+            return "Error: book not found";
+        }
+        if (!book.isAvailable()) {
+            return "Error: book is not available";
+        }
+
+        Loan loan = loanManager.createLoan(bookId, memberId, borrowDate);
+        bookCatalog.updateAvailability(bookId, false);
+        notificationService.notifyBorrowed(member, book);
+
+        return "Book borrowed successfully. Due date: " + loan.getDueDate();
     }
 }
